@@ -3,6 +3,8 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 import numpy as np
 import os
+from PIL import Image
+import io
 
 app = Flask(__name__)
 
@@ -21,15 +23,24 @@ def predict():
     file = request.files['image']
     print("Uploaded file:", file.filename)
 
+    # Create the uploads directory if it doesn't exist
+    uploads_dir = os.path.join(app.instance_path, 'uploads')
+    if not os.path.exists(uploads_dir):
+        os.makedirs(uploads_dir)
+
     # Save the file to a temporary location
-    file_path = os.path.join(os.getcwd(), file.filename)
+    file_path = os.path.join(uploads_dir, file.filename)
     file.save(file_path)
 
-    # Load the image using Keras
-    img = image.load_img(file_path, target_size=(150, 150))
+    with open(file_path, 'rb') as f:
+        img = Image.open(io.BytesIO(f.read()))
+        img.load()
+
+    # Resize the image to 150x150 pixels
+    img = img.resize((150, 150))
 
     # Convert the image to a numpy array
-    img_array = image.img_to_array(img)
+    img_array = np.array(img)
 
     # Normalize the pixel values (in the range of 0-1)
     img_array = img_array / 255.
