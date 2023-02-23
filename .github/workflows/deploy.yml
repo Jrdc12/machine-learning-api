@@ -1,7 +1,5 @@
 name: Build and Run Docker
 
-name: Build and Run Docker
-
 on:
   push:
     branches:
